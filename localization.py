@@ -13,3 +13,4 @@ class Lang:
     def __str__(self):
         with open(f'local/{self.lang_settings}', 'r') as file:
             return list(eval(file.read()))[self.element]
+
