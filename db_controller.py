@@ -91,3 +91,6 @@ class Residents(Database):
         """
         return self._cursor.execute(f"""SELECT ({','.join(columns)}) FROM {self._table_name} WHERE resident_id = ?""",
                                     (resident_id,))
+
+class Apartments(Database):
+    pass
