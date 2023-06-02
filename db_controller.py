@@ -49,7 +49,7 @@ class Database:
                 type_name TEXT
             )
         """)
-        # todo add payments table
+
 
     def insert(self, **kwargs):
         pass
@@ -86,7 +86,7 @@ class Residents(Database):
 
     def select(self, columns: list, key_word: str, value):
         """
-        :param columns: list, resident_id, apartment_id, tel_id, ph_num, user_type, *
+        :param columns: list; resident_id, apartment_id, tel_id, ph_num, user_type, *
         :param resident_id:
         :return:
         """

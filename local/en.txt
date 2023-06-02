@@ -2,4 +2,5 @@
 2:'Add a new resident to system',
 3:'Update information',
 4:'Delete a resident',
-5:'Get information about residents'}
+5:'Get information about residents',
+6:'',7:'',8:''}
