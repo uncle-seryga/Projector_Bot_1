@@ -1,21 +1,43 @@
 import datetime
 
-import pandas
+import pandas as pd
+
+import db_controller
 
 
 class Payments:
     def __init__(self):
         self.current_month = datetime.datetime.now().month
         self.current_year = datetime.datetime.now().year
+        self.df = self.__get_data()
+        self.rate = self.__get_rates()['PRICE'][0]
+        self.debt = self.__get_rates()['PRICE'][1]
 
-    def __get_data(self, filename):
-        return pandas.read_excel(f"{filename}.xls")
+    @staticmethod
+    def __get_data():
+        sheet_id = '1PnMkGXh-VC6IyOzr56C38wvv_AVtGQZG1I5dMnhabuU'
+        url = f'https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv'
+        df = pd.read_csv(url)
+        return df
 
-    def get_debt_by_apartment_id(self, apartment_id, year=None):
-        data = self.__get_data(year)
-        fee_size = int(eval(open(f'settings.txt', 'r').read())['fee'])
-        total_paid = data.loc[apartment_id - 1][1:].transpose().sum()
-        need_to_be_paid = fee_size * self.current_month
-        print(total_paid, need_to_be_paid)
-        return True if total_paid - need_to_be_paid > -(fee_size * 3) else False
+    @staticmethod
+    def __get_rates():
+        df = pd.read_excel("rates.xls")
+        return df
 
+    def get_if_debt(self, tel_id):
+        first_column = self.df.iloc[1:, 0]
+        rest = self.df.iloc[1:, 4:16]
+        data_frame = pd.concat([first_column, rest], axis=1)
+        data_frame.columns = ['apartment', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+                              'September', 'October', 'November', 'December']
+        mon = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
+               'November', 'December']
+        code = db_controller.Residents().select(['apartment_code'], key_word="tel_id", value=tel_id)
+        data_frame[mon] = data_frame[mon].apply(pd.to_numeric, errors='coerce')
+        formula = lambda row: row.count() * self.rate - row.sum()
+        data_frame['Paid'] = data_frame[mon].apply(formula, axis=1)
+        target = data_frame[data_frame['apartment'] == code]
+        res = data_frame.loc[target.index.values[0]]["Paid"]
+        print(f"{res}<{self.debt}")
+        return True if res < self.debt else False

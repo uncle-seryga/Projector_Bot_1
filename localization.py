@@ -1,8 +1,11 @@
 import os
-class Localization:
-    def __init__(self, element: int, user_language):
+
+
+class Lang:
+    def __init__(self, user_language, element: int):
+        self.dir = 'local'
         self.element = element
-        self.lang_list = os.listdir('local')
+        self.lang_list = os.listdir(self.dir)
         self.set_language = user_language
         if user_language in self.lang_list:
             self.set_language = user_language
@@ -12,6 +15,6 @@ class Localization:
             self.set_language = 'en'
 
     def __str__(self):
-        with open(f'Languages/{self.set_language}.txt', 'r') as file:
+        with open(f'{self.dir}/{self.set_language}.txt', 'r') as file:
             funct = (eval(file.read()))
             return funct[self.element]

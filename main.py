@@ -2,8 +2,10 @@ import telebot
 from telebot import types
 
 import db_controller
+import payments
 from localization import Lang
 
+# @prjctr_demo_bot
 bot = telebot.TeleBot('5971276481:AAFEI89d5Cr9bPzsPJOkc08Gy0FLo09K2CU')
 keyboard_transport_types = types.ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
 keyboard_transport_lp = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -20,15 +22,17 @@ def handle_start(message: types.Message):
 
 @bot.message_handler(func=lambda message: True)
 def handle_application(message: types.Message):
-    print(message)
     if message.text == str(Lang(message.from_user.language_code, 1)):
-        for x in [str(Lang(message.from_user.language_code, 6)),
-                  str(Lang(message.from_user.language_code, 7)),
-                  str(Lang(message.from_user.language_code, 8))]:
-            keyboard_transport_types.add(x)
-        bot.send_message(message.chat.id, "Будь ласка, оберіть тип ТЗ для пропуску:",  # todo add localization
-                         reply_markup=keyboard_transport_types)
-        bot.register_next_step_handler(message, process_transport_type)
+        if payments.Payments().get_if_debt(tel_id=message.chat.id):  # message.chat.id
+            for x in [str(Lang(message.from_user.language_code, 6)),
+                      str(Lang(message.from_user.language_code, 7)),
+                      str(Lang(message.from_user.language_code, 8))]:
+                keyboard_transport_types.add(x)
+            bot.send_message(message.chat.id, "Будь ласка, оберіть тип ТЗ для пропуску:",  # todo add localization
+                             reply_markup=keyboard_transport_types)
+            bot.register_next_step_handler(message, process_transport_type)
+        else:
+            bot.send_message(message.chat.id, str(Lang(message.from_user.language_code, 8)))
 
 
 query = []
@@ -43,10 +47,15 @@ def process_transport_type(message):
 
 
 def process_license_plate(message: telebot.types.Message):
-    lp = message.text
+    send_request(message.text)
+
+
+def send_request(lp):
     for x in db_controller.Residents().select(columns=['tel_id'], key_word='user_type', value='security'):
         bot.send_message(x,
-                         f'Request from APT {db_controller.Residents().select(columns=["apartments_id"], key_word="tel_id", value=message.chat.id)} for {query[0]} with LP {lp}')
+                         f'Request from APT '
+                         f'{db_controller.Residents().select(columns=["apartments_id"], key_word="tel_id", value=message.chat.id)} '
+                         f'for {query[0]} with LP {lp}') # todo localization
 
 
 bot.polling()
