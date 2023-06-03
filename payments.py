@@ -33,11 +33,22 @@ class Payments:
                               'September', 'October', 'November', 'December']
         mon = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
                'November', 'December']
-        code = db_controller.Residents().select(['apartment_code'], key_word="tel_id", value=tel_id)
+        apt_id = db_controller.Residents().select(['apartment_id'], key_word="tel_id", value=tel_id)
+        # print(apt_id)
+        try:
+            code = db_controller.Apartments().select_apt_code(apt_id)
+        except:
+            return 3
         data_frame[mon] = data_frame[mon].apply(pd.to_numeric, errors='coerce')
         formula = lambda row: row.count() * self.rate - row.sum()
         data_frame['Paid'] = data_frame[mon].apply(formula, axis=1)
-        target = data_frame[data_frame['apartment'] == code]
-        res = data_frame.loc[target.index.values[0]]["Paid"]
-        print(f"{res}<{self.debt}")
-        return True if res < self.debt else False
+        try:
+            target = data_frame[data_frame['apartment'] == code]
+            res = data_frame.loc[target.index.values[0]]["Paid"]
+            return True if res < self.debt else False
+        except IndexError:
+            return 3
+
+    def get_all_apt_codes(self):
+        data = self.__get_data()
+        return data['id'][1:]

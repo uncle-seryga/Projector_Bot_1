@@ -1,9 +1,16 @@
 {0:'Welcome!How can I help you?',
-1:'Add a new resident to system',
+1:'Add request',
 2:'Update information',
 3:'Delete a resident',
 4:'Get information about residents',
 5:'Taxi',
 6:'Delivery',
 7:'Guest',
-8:'Please cover your debts!'}
+8:'Access denied! Cover your debts!',
+9:"Please choose type of vehicle",
+10:"No licence plate",
+11:"Please add licence plate",
+12:"You are not a member of community",
+13:"Request from APT #",
+14:"for access to",
+15:"licence plate - "}

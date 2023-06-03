@@ -50,7 +50,6 @@ class Database:
             )
         """)
 
-
     def insert(self, **kwargs):
         pass
 
@@ -66,6 +65,10 @@ class Database:
 
 class Residents(Database):
     _table_name = 'residents'
+
+    def check_if_resident(self, tel_id):
+        list_tel_id = self.select(['tel_id'], key_word='tel_id', value=tel_id)
+        return False if list_tel_id == [] else True
 
     def insert(self, apartment_id, tel_id, ph_num, user_type=0):
         self._cursor.execute(
@@ -164,9 +167,9 @@ class TypesOfUsers(Database):
         return self._cursor.execute(f"SELECT {','.join(columns)} FROM {self._table_name} WHERE user_type=?",
                                     (user_type,)).fetchall()
 
-
     class Payments(Database):
         _table_name = "payments"
+
         def insert(self, apartment_id, date, amount):
             self._cursor.execute(f"""INSERT INTO {self._table_name} (apartament_id, date, sum) VALUES (?,?,?)""",
                                  (apartment_id, date, amount))
@@ -185,6 +188,7 @@ class TypesOfUsers(Database):
             self._cursor.execute(f"""SELECT * FROM {self._table_name} WHERE payment_id = ?""", (payment_id,))
             return self._cursor.fetchall()
 
+
 class Apartments(Database):
     _table_name = 'apartments'
 
@@ -192,7 +196,7 @@ class Apartments(Database):
         self._cursor.execute(
             f"""INSERT INTO {self._table_name}
             (apartment_id, apartment_code) VALUES (NULL,?)""",
-            (apartment_code))
+            (apartment_code,))
         self._connect.commit()
 
     def update(self, apartment_id, apartment_code):
@@ -205,7 +209,7 @@ class Apartments(Database):
         self._cursor.execute(F"""DELETE * FROM {self._table_name} WHERE apartment_id = ?""", (apartment_id,))
         self._connect.commit()
 
-    def select(self, columns: list, key_word:str, value):
+    def select(self, columns: list, key_word: str, value):
         """
         :param columns: list, apartment_id, apartment_code, *
         :param apartment_id:
@@ -215,4 +219,8 @@ class Apartments(Database):
             f"""SELECT {','.join(columns)} FROM {self._table_name} WHERE {key_word} = ?""",
             (value,)).fetchall()
 
-
+    def select_apt_code(self, apt_id):
+        res = self._cursor.execute(f"""SELECT apartment_code FROM {self._table_name} WHERE apartment_id = ?""",
+                                   (apt_id,)).fetchall()[0]
+        print(res)
+        return res[0]
